@@ -9,8 +9,7 @@ from fastapi.templating import Jinja2Templates
 app = FastAPI()
 
 # Load the trained model and scaler
-model = joblib.load('tankering_model.pkl')
-scaler = joblib.load('scaler.pkl')
+model = joblib.load('pred_tank.joblib')
 
 # Template rendering
 templates = Jinja2Templates(directory="templates")
@@ -46,11 +45,9 @@ async def predict(
     # Prepare the input features for the model
     input_features = np.array([[Pax, Temperature, AirDist, FlightTime, TripFuel, DepFuelPrice, DestFuelPrice]])
 
-    # Scale the input features
-    scaled_features = scaler.transform(input_features)
 
     # Make prediction
-    prediction = model.predict(scaled_features)
+    prediction = model.predict(input_features)
 
     # Interpret the result
     result = "Yes" if prediction[0] == 1 else "No"
@@ -66,10 +63,8 @@ async def predict_api(data: PredictRequest):
     input_features = np.array([[data.Pax, data.Temperature, data.AirDist, data.FlightTime,
                                 data.TripFuel, data.DepFuelPrice, data.DestFuelPrice]])
 
-    # Scale input features
-    scaled_features = scaler.transform(input_features)
 
     # Make prediction
-    prediction = model.predict(scaled_features)
+    prediction = model.predict(input_features)
 
     return {"Tankering Decision": "Yes" if prediction[0] == 1 else "No"}
