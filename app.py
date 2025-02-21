@@ -11,6 +11,10 @@ app = FastAPI()
 # Load the trained model and scaler
 model = joblib.load('pred_tank.joblib')
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
 =======
 
 >>>>>>> Stashed changes
