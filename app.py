@@ -10,6 +10,10 @@ app = FastAPI()
 
 # Load the trained model and scaler
 model = joblib.load('pred_tank.joblib')
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
 
 # Template rendering
 templates = Jinja2Templates(directory="templates")

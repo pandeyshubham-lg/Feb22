@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tankering Decision</title>
+</head>
+<body>
+    <h1>Tankering Decision</h1>
+    <form method="post" action="/predict">
+        <label for="Pax">Pax:</label>
+        <input type="text" name="Pax" id="Pax"><br>
+
+        <label for="Temperature">Temperature:</label>
+        <input type="text" name="Temperature" id="Temperature"><br>
+
+        <label for="AirDist">Air Distance:</label>
+        <input type="text" name="AirDist" id="AirDist"><br>
+
+        <label for="FlightTime">Flight Time:</label>
+        <input type="text" name="FlightTime" id="FlightTime"><br>
+
+        <label for="TripFuel">Trip Fuel:</label>
+        <input type="text" name="TripFuel" id="TripFuel"><br>
+
+        <label for="DepFuelPrice">Departure Fuel Price:</label>
+        <input type="text" name="DepFuelPrice" id="DepFuelPrice"><br>
+
+        <label for="DestFuelPrice">Destination Fuel Price:</label>
+        <input type="text" name="DestFuelPrice" id="DestFuelPrice"><br>
+
+        <input type="submit" value="Predict">
+    </form>
+
+    {% if prediction_text %}
+        <h2>{{ prediction_text }}</h2>
+    {% endif %}
+</body>
+</html>
