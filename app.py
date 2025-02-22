@@ -1,78 +1,46 @@
+from fastapi import FastAPI, Request, Form
+from fastapi.templating import Jinja2Templates
+from fastapi.responses import JSONResponse
 import numpy as np
 import joblib
-from fastapi import FastAPI, Request, Form
-from pydantic import BaseModel
-from typing import List
-from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
 
 app = FastAPI()
-
-# Load the trained model and scaler
-model = joblib.load('pred_tank.joblib')
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-=======
-
->>>>>>> Stashed changes
-=======
-
->>>>>>> Stashed changes
-
-# Template rendering
 templates = Jinja2Templates(directory="templates")
 
-
-# Pydantic model for API input validation
-class PredictRequest(BaseModel):
-    Pax: float
-    Temperature: float
-    AirDist: float
-    FlightTime: float
-    TripFuel: float
-    DepFuelPrice: float
-    DestFuelPrice: float
-
-
-@app.get("/", response_class=HTMLResponse)
-async def home(request: Request):
-    return templates.TemplateResponse("home.html", {"request": request})
-
+# Load the trained model
+model = joblib.load("pred_tank.joblib")
 
 @app.post("/predict")
 async def predict(
-        request: Request,
-        Pax: float = Form(...),
-        Temperature: float = Form(...),
-        AirDist: float = Form(...),
-        FlightTime: float = Form(...),
-        TripFuel: float = Form(...),
-        DepFuelPrice: float = Form(...),
-        DestFuelPrice: float = Form(...)
+    request: Request,
+    Pax: str = Form(...),
+    Temperature: str = Form(...),
+    AirDist: str = Form(...),
+    FlightTime: str = Form(...),
+    TripFuel: str = Form(...),
+    DepFuelPrice: str = Form(...),
+    DestFuelPrice: str = Form(...)
 ):
-    # Prepare the input features for the model
-    input_features = np.array([[Pax, Temperature, AirDist, FlightTime, TripFuel, DepFuelPrice, DestFuelPrice]])
+    try:
+        # Convert inputs to float
+        input_features = np.array([[
+            float(Pax), float(Temperature), float(AirDist), float(FlightTime),
+            float(TripFuel), float(DepFuelPrice), float(DestFuelPrice)
+        ]])
 
+        # Make prediction
+        prediction = model.predict(input_features)
+        result = "Yes" if prediction[0] == 1 else "No"
 
-    # Make prediction
-    prediction = model.predict(input_features)
+        # Check if the request is from an API call (JSON expected)
+        if request.headers.get("accept") == "application/json":
+            return JSONResponse(content={"tankering_decision": result})
 
-    # Interpret the result
-    result = "Yes" if prediction[0] == 1 else "No"
-
-    return templates.TemplateResponse(
-        "home.html", {"request": request, "prediction_text": f"Tankering Decision: {result}"}
-    )
-
-
-@app.post("/predict_api")
-async def predict_api(data: PredictRequest):
-    # Prepare input features
-    input_features = np.array([[data.Pax, data.Temperature, data.AirDist, data.FlightTime,
-                                data.TripFuel, data.DepFuelPrice, data.DestFuelPrice]])
-
-
-    # Make prediction
-    prediction = model.predict(input_features)
-
-    return {"Tankering Decision": "Yes" if prediction[0] == 1 else "No"}
+        # Otherwise, return HTML (for web users)
+        return templates.TemplateResponse(
+            request, "home.html", {"request": request, "prediction_text": f"Tankering Decision: {result}"}
+        )
+    except ValueError:
+        return JSONResponse(
+            content={"error": "Invalid input. Please enter valid numbers."}, status_code=400
+        )
